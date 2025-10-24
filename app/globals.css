@@ -1,0 +1,168 @@
+/* Dark theme color variables - centralized for easy changes */
+:root {
+    /* Bootstrap overrides */
+    --bs-body-bg: #121212;
+    --bs-body-color: #e0e0e0;
+    --bs-secondary-bg: #343a40;
+    --bs-secondary-color: #ffffff;
+    
+    /* Custom theme colors */
+    --primary-bg: #212529;
+    --secondary-bg: #343a40;
+    --accent-bg: #495057;
+    --border-color: #6c757d;
+    --text-primary: #ffffff;
+    --text-secondary: #e0e0e0;
+    --text-muted: #6c757d;
+    
+    /* Interactive colors */
+    --focus-border: #86b7fe;
+    --focus-shadow: rgba(13, 110, 253, 0.25);
+    --hover-bg: #6c757d;
+    
+    /* Game specific colors */
+    --game-bg: var(--primary-bg);
+    --game-gap: 5px;
+    --game-padding: 20px;
+    --game-cell-size: 40px;
+}
+
+/* Layout structure for sticky footer */
+html, body {
+    height: 100%;
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Main game area - auto-fills remaining height */
+main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.game {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: var(--game-padding);
+    background-color: var(--game-bg);
+    flex: 1;
+}
+
+.game-grid {
+    display: grid;
+    gap: var(--game-gap);
+    max-width: 90vw;
+    overflow: auto;
+}
+
+.game-cell {
+    width: var(--game-cell-size);
+    height: var(--game-cell-size);
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border-color);
+    user-select: none;
+}
+
+/* Form elements using color variables */
+.form-select {
+    background-color: var(--accent-bg);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+}
+
+.form-select:focus {
+    border-color: var(--focus-border);
+    box-shadow: 0 0 0 0.25rem var(--focus-shadow);
+}
+
+/* Button styles using color variables */
+.btn-outline-secondary {
+    border-color: var(--border-color);
+    color: var(--text-muted);
+}
+
+.btn-outline-secondary:hover {
+    background-color: var(--hover-bg);
+    border-color: var(--hover-bg);
+    color: var(--text-primary);
+}
+
+.action-button {
+    width: 120px;
+    font-size: 14px;
+}
+
+.action-input {
+    width: 80px;
+}   
+
+.vertical-divider {
+    border-left: 2px solid var(--border-color);
+    height: 35px;
+    margin: 0 10px;
+}
+
+/* Custom responsive adjustments */
+@media (max-width: 768px) {
+    .action-button {
+        width: 100px;
+        font-size: 12px;
+    }
+    
+    .action-input {
+        width: 70px;
+    }
+    
+    .game-cell {
+        width: 35px;
+        height: 35px;
+        font-size: 18px;
+    }
+    
+    :root {
+        --game-cell-size: 35px;
+        --game-padding: 15px;
+    }
+}
+
+/* Dark theme number colors for minesweeper */
+.mine-1 { color: #1976d2; }
+.mine-2 { color: #388e3c; }
+.mine-3 { color: #d32f2f; }
+.mine-4 { color: #7b1fa2; }
+.mine-5 { color: #689f38; }
+.mine-6 { color: #0288d1; }
+.mine-7 { color: #f57c00; }
+.mine-8 { color: #5d4037; }
+
+/* Chord clicking visual hints */
+.chord-clickable {
+  cursor: pointer;
+  position: relative;
+}
+
+.chord-clickable:hover {
+  transform: scale(0.98);
+  box-shadow: inset 0 0 5px rgba(255, 255, 255, 0.3);
+}
+
+.chord-clickable::after {
+  content: '';
+  position: absolute;
+  top: 1px;
+  right: 1px;
+  width: 6px;
+  height: 6px;
+  background: rgba(0, 123, 255, 0.6);
+  border-radius: 50%;
+  opacity: 0.7;
+}
