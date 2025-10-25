@@ -1,6 +1,6 @@
 import GameCell from './GameCell'
 
-export default function GameBoard({ board, onCellClick, onCellRightClick, onCellDoubleClick }) {
+export default function GameBoard({ board, onCellClick, onCellRightClick, onCellDoubleClick, highlightedCell }) {
   if (!board.length) {
     return (
       <div className="game">
@@ -22,23 +22,22 @@ export default function GameBoard({ board, onCellClick, onCellRightClick, onCell
   const cols = board[0]?.length || 0
 
   return (
-    <div className="game">
-      <div 
-        className="game-grid"
-        style={{
-          gridTemplateColumns: `repeat(${cols}, var(--game-cell-size))`
-        }}
-      >
-        {board.flat().map((cell, index) => (
-          <GameCell
-            key={`${cell.row}-${cell.col}`}
-            cell={cell}
-            onCellClick={onCellClick}
-            onCellRightClick={onCellRightClick}
-            onCellDoubleClick={onCellDoubleClick}
-          />
-        ))}
-      </div>
+    <div 
+      className="game-grid"
+      style={{
+        gridTemplateColumns: `repeat(${cols}, var(--game-cell-size))`
+      }}
+    >
+      {board.flat().map((cell, index) => (
+        <GameCell
+          key={`${cell.row}-${cell.col}`}
+          cell={cell}
+          onCellClick={onCellClick}
+          onCellRightClick={onCellRightClick}
+          onCellDoubleClick={onCellDoubleClick}
+          isHighlighted={highlightedCell === `${cell.row}-${cell.col}`}
+        />
+      ))}
     </div>
   )
 }

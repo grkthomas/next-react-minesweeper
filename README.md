@@ -9,6 +9,7 @@ A modern Minesweeper game built with Next.js, React, and Bootstrap 5 with a beau
 - 🎯 **Multiple Difficulty Levels**: Easy, Medium, Hard, and Custom grid sizes
 - 🎨 **Dark Theme**: Beautiful dark mode with Bootstrap 5
 - ⏱️ **Timer & Statistics**: Track your time, mines, and flags
+- 🤖 **Autoplay Simulator**: Watch an automated player highlight moves and log every click
 - 📱 **Responsive Design**: Works on desktop and mobile devices
 - 🚀 **Next.js Powered**: Fast, optimized React application
 - 🎪 **Visual Enhancements**: Chord-click indicators and hover effects
@@ -29,6 +30,11 @@ A modern Minesweeper game built with Next.js, React, and Bootstrap 5 with a beau
 - **Chord-Clicking**: Double-click any revealed numbered cell when you have the correct number of flags around it to auto-reveal all unflagged neighbors
 - **Flood Fill**: Clicking empty cells (0 neighboring mines) automatically reveals connected safe areas
 - **Visual Hints**: Numbered cells show a blue dot indicator when they can be chord-clicked
+
+### Simulation Mode
+- **Toggle Autoplay**: Use the `Simulate` button in the controls to let an automated player pick random unrevealed cells while the board highlights the next move.
+- **Live Click Log**: A sidebar appears during or after simulation runs, capturing timestamps, coordinates, cell types, and whether each click was safe or a mine.
+- **Automatic Shutdown**: The simulator stops itself when you end it manually, win, lose, or start a brand-new game, ensuring normal play resumes instantly.
 
 ## Difficulty Levels
 

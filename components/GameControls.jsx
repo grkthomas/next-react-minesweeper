@@ -5,20 +5,39 @@ export default function GameControls({
   customRows, 
   customCols, 
   onCustomRowsChange, 
-  onCustomColsChange 
+  onCustomColsChange,
+  isSimulating,
+  onSimulateToggle,
+  gameState
 }) {
   return (
     <div className="d-flex justify-content-center align-items-center py-3 border-bottom border-secondary flex-wrap">
+
+      <button 
+        onClick={onSimulateToggle}
+        className={`btn mx-1 action-button mb-2 ${isSimulating ? 'btn-danger' : 'btn-warning'}`}
+        disabled={gameState === 'won' || gameState === 'lost'}
+      >
+        <i className={`me-1 fas ${isSimulating ? 'fa-stop' : 'fa-play'}`}></i> 
+        <span> {isSimulating ? 'Stop' : 'Simulate'} </span>
+      </button>
+
+      <span className="vertical-divider"></span>
+
       <button 
         onClick={onNewGame} 
         className="btn btn-primary mx-1 action-button mb-2"
+        disabled={isSimulating}
       >
         <i className="fas fa-redo"></i> New Game
       </button>
       
+      <span className="vertical-divider"></span>
+      
       <button 
         onClick={() => onDifficultyChange('easy')}
         className={`btn mx-1 action-button mb-2 ${difficulty === 'easy' ? 'btn-success' : 'btn-secondary'}`}
+        disabled={isSimulating}
       >
         Easy
       </button>
@@ -26,6 +45,7 @@ export default function GameControls({
       <button 
         onClick={() => onDifficultyChange('medium')}
         className={`btn mx-1 action-button mb-2 ${difficulty === 'medium' ? 'btn-success' : 'btn-secondary'}`}
+        disabled={isSimulating}
       >
         Medium
       </button>
@@ -33,6 +53,7 @@ export default function GameControls({
       <button 
         onClick={() => onDifficultyChange('hard')}
         className={`btn mx-1 action-button mb-2 ${difficulty === 'hard' ? 'btn-success' : 'btn-secondary'}`}
+        disabled={isSimulating}
       >
         Hard
       </button>
@@ -42,6 +63,7 @@ export default function GameControls({
       <button 
         onClick={() => onDifficultyChange('custom')}
         className={`btn mx-1 action-button mb-2 ${difficulty === 'custom' ? 'btn-success' : 'btn-secondary'}`}
+        disabled={isSimulating}
       >
         Custom
       </button>
@@ -55,6 +77,7 @@ export default function GameControls({
         min="5" 
         max="50"
         placeholder="Rows"
+        disabled={isSimulating}
       />
       
       <input 
@@ -66,6 +89,7 @@ export default function GameControls({
         min="5" 
         max="50"
         placeholder="Cols"
+        disabled={isSimulating}
       />
     </div>
   )

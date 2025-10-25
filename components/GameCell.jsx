@@ -1,4 +1,4 @@
-export default function GameCell({ cell, onCellClick, onCellRightClick, onCellDoubleClick }) {
+export default function GameCell({ cell, onCellClick, onCellRightClick, onCellDoubleClick, isHighlighted }) {
   const getCellContent = () => {
     if (cell.isRevealed) {
       if (cell.isMine) {
@@ -17,7 +17,11 @@ export default function GameCell({ cell, onCellClick, onCellRightClick, onCellDo
 
   const getCellClass = () => {
     let baseClass = 'btn btn-sm m-0 p-1 game-cell'
-    if (cell.isRevealed) {
+    
+    // Add simulation highlight
+    if (isHighlighted) {
+      baseClass += ' btn-warning simulation-highlight'
+    } else if (cell.isRevealed) {
       if (cell.isMine) {
         baseClass += ' btn-danger'
       } else {
