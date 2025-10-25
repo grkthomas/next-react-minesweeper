@@ -13,6 +13,7 @@ A modern Minesweeper game built with Next.js, React, and Bootstrap 5 with a beau
 - 📱 **Responsive Design**: Works on desktop and mobile devices
 - 🚀 **Next.js Powered**: Fast, optimized React application
 - 🎪 **Visual Enhancements**: Chord-click indicators and hover effects
+- 🏆 **Persistent Scoreboard**: Save your best times to a local SQLite database and view the top results
 
 ## Game Rules
 
@@ -75,6 +76,18 @@ A modern Minesweeper game built with Next.js, React, and Bootstrap 5 with a beau
 
 4. **Open Browser**
    Navigate to [http://localhost:3000](http://localhost:3000)
+
+### Scoreboard Storage (SQLite)
+
+This project stores scores locally using SQLite via `better-sqlite3`.
+
+- Database file: `data/scores.sqlite` (created on first run)
+- API endpoints:
+   - `GET /api/scores?limit=10&size=9x9` — fetch top scores (fastest times), optional `size` filter
+   - `POST /api/scores` — body: `{ name: string, mines: number, size: string, time: number }`
+- Table schema: `scores(id, name, mines, size, time, created_at)`
+
+When you win a game, you'll be prompted to enter your name to save your score. The scoreboard component displays the top results and can be refreshed.
 
 #### **WSL2/Linux Troubleshooting Installation**
 
@@ -159,13 +172,16 @@ npm run build
 npm run start
 ```
 
-### Static Export (Optional)
+### Static Export (Note)
+
+Static export (`output: 'export'`) is not compatible with API routes or the SQLite scoreboard. To use the scoreboard, run the app with the Node server:
 
 ```bash
 npm run build
+npm start
 ```
 
-This will generate a static export in the `out/` directory that can be deployed to any static hosting service.
+If you do want a pure static export, you must remove the scoreboard feature (or switch to a client-only storage approach).
 
 ### Advanced Troubleshooting
 

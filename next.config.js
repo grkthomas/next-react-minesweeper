@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'export',
+  // Switch to server runtime to support API routes & SQLite
+  // Remove 'output: "export"' because static export doesn't support API routes
   trailingSlash: true,
   images: {
     unoptimized: true

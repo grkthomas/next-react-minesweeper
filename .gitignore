@@ -170,6 +170,9 @@ temp/
 # Local development
 .local
 
+# Local SQLite database
+data/
+
 # Package manager locks (optional - uncomment if you want to ignore them)
 # package-lock.json
 # yarn.lock

@@ -5,6 +5,7 @@ import Header from '../components/Header'
 import GameControls from '../components/GameControls'
 import GameStats from '../components/GameStats'
 import GameBoard from '../components/GameBoard'
+import ScoreboardModal from '../components/ScoreboardModal'
 import SimulationSidebar from '../components/SimulationSidebar'
 import Footer from '../components/Footer'
 import { GameUtil } from '../utils/GameUtil'
@@ -24,6 +25,8 @@ export default function MinesweeperPage() {
   // Interval removed in async simulation mode
   const [highlightedCell, setHighlightedCell] = useState(null)
   const [simulationHistory, setSimulationHistory] = useState([])
+  const [scoreSaved, setScoreSaved] = useState(false)
+  const [showScores, setShowScores] = useState(false)
   
   // Refs to track current state for simulation (avoid closure issues)
   const gameStateRef = useRef(gameState)
@@ -55,6 +58,7 @@ export default function MinesweeperPage() {
     setIsSimulating(false)
     setHighlightedCell(null)
     setSimulationHistory([])
+  setScoreSaved(false)
     
     // Get difficulty settings using GameUtil
     const settings = GameUtil.getDifficultySettings(difficulty, customRows, customCols)
@@ -212,6 +216,31 @@ export default function MinesweeperPage() {
     }
   }, [gameState, isSimulating])
 
+  // Prompt to save score on win
+  useEffect(() => {
+    if (gameState === 'won' && !scoreSaved) {
+      // Simple prompt-based input; can be replaced by a modal for better UX
+      const name = typeof window !== 'undefined' ? window.prompt('You won! Enter your name to save your score:') : null
+      if (name && name.trim()) {
+        const rows = boardRef.current?.length || 0
+        const cols = rows > 0 ? (boardRef.current[0]?.length || 0) : 0
+        const size = `${rows}x${cols}`
+        const payload = {
+          name: name.trim(),
+          mines: mineCountRef.current || 0,
+          size,
+          time: timer,
+        }
+        fetch('/api/scores', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        }).catch(err => console.error('Failed to save score', err))
+      }
+      setScoreSaved(true)
+    }
+  }, [gameState, scoreSaved, timer])
+
   return (
     <div className="d-flex flex-column min-vh-100">
       <Header />
@@ -228,6 +257,7 @@ export default function MinesweeperPage() {
           isSimulating={isSimulating}
           onSimulateToggle={handleSimulateToggle}
           gameState={gameState}
+          onShowScores={() => setShowScores(true)}
         />
         
         {board.length > 0 && (
@@ -238,6 +268,12 @@ export default function MinesweeperPage() {
             timer={timer}
           />
         )}
+        {/* Scoreboard Modal */}
+        <ScoreboardModal 
+          isOpen={showScores} 
+          onClose={() => setShowScores(false)}
+          sizeFilter={board.length > 0 ? `${board.length}x${board[0].length}` : undefined}
+        />
         
         <div className="game">
           <div className={(isSimulating || simulationHistory.length > 0) ? "game-with-sidebar" : ""}>

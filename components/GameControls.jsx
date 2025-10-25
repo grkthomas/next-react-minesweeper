@@ -8,10 +8,18 @@ export default function GameControls({
   onCustomColsChange,
   isSimulating,
   onSimulateToggle,
-  gameState
+  gameState,
+  onShowScores
 }) {
   return (
     <div className="d-flex justify-content-center align-items-center py-3 border-bottom border-secondary flex-wrap">
+      
+      <button 
+        onClick={onShowScores}
+        className="btn btn-info mx-1 action-button mb-2"
+      >
+        <i className="fas fa-trophy me-1"></i> Scores
+      </button>
 
       <button 
         onClick={onSimulateToggle}
