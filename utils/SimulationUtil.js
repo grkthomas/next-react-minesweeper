@@ -1,6 +1,19 @@
-// Removed devLog imports
-// Private interval constant (ms)
-const INTERVAL_TIME = 2000
+// utils/SimulationUtil.js
+
+/** 
+ * Utility functions for managing game simulations.
+ * The purpose of the simulator is to provide a proof-of-concept automated player
+ * that can interact with the Minesweeper game board for testing or demonstration purposes.
+ * 
+ * Said proof-of-concept will be used to build a more advanced automated player in the future by replacing 
+ * the selectRandomCell() with smarter logic.
+ * 
+ * It supports flag-based simulations where cells are selected and clicked based on simple heuristics.
+ * The simulation can be started, stopped, and will automatically halt when the game ends.
+ */
+
+
+
 
 export class SimulationUtil {
   /**
@@ -13,6 +26,9 @@ export class SimulationUtil {
    * @param {Function} callbacks.setSimulationInterval - Interval setter
    * @returns {Object} Simulation manager with methods
    */
+
+  static INTERVAL_TIME = 2000
+
   static createFlagBasedSimulation(callbacks) {
     const {
       getCurrentState,
@@ -69,10 +85,10 @@ export class SimulationUtil {
         return true
       }
 
-  // Derive per-phase durations from total stepInterval if not provided
-  const hMs = typeof highlightMs === 'number' ? highlightMs : Math.floor(stepInterval / 2)
-  const dMs = typeof deadMs === 'number' ? deadMs : (stepInterval - hMs)
-  console.log(`▶️ STARTING ASYNC SIMULATION with ${stepInterval}ms steps (highlight=${hMs}ms, dead=${dMs}ms)`)      
+      // Derive per-phase durations from total stepInterval if not provided
+      const hMs = typeof highlightMs === 'number' ? highlightMs : Math.floor(stepInterval / 2)
+      const dMs = typeof deadMs === 'number' ? deadMs : (stepInterval - hMs)
+      console.log(`▶️ STARTING ASYNC SIMULATION with ${stepInterval}ms steps (highlight=${hMs}ms, dead=${dMs}ms)`)
 
       // Reset flags
       simulationFlags.step = 'idle'
@@ -80,7 +96,7 @@ export class SimulationUtil {
       simulationFlags.shouldStop = false
 
       setIsSimulating(true)
-  // No interval used in async mode
+      // No interval used in async mode
 
       runningPromise = (async () => {
         try {
@@ -158,25 +174,25 @@ export class SimulationUtil {
    */
   static getUnrevealedCells(board) {
     const unrevealedCells = []
-    
+
     // Validate board structure
     if (!board || !Array.isArray(board) || board.length === 0) {
       console.error('🚨 Invalid board in getUnrevealedCells:', board)
       return unrevealedCells
     }
-    
+
     board.forEach((row, rowIndex) => {
       if (!Array.isArray(row)) {
         console.error(`🚨 Invalid row ${rowIndex}:`, row)
         return
       }
-      
+
       row.forEach((cell, colIndex) => {
         if (!cell || typeof cell !== 'object') {
           console.error(`🚨 Invalid cell at (${rowIndex}, ${colIndex}):`, cell)
           return
         }
-        
+
         if (!cell.isRevealed && !cell.isFlagged) {
           unrevealedCells.push({ row: rowIndex, col: colIndex })
         }
@@ -192,7 +208,7 @@ export class SimulationUtil {
    */
   static selectRandomCell(unrevealedCells) {
     if (unrevealedCells.length === 0) return null
-    
+
     const randomCell = unrevealedCells[Math.floor(Math.random() * unrevealedCells.length)]
     return randomCell
   }
@@ -210,7 +226,7 @@ export class SimulationUtil {
         reason: `Game ended with state: ${gameState}`
       }
     }
-    
+
     const unrevealedCells = SimulationUtil.getUnrevealedCells(board)
     if (unrevealedCells.length === 0) {
       return {
@@ -218,7 +234,7 @@ export class SimulationUtil {
         reason: 'No more cells to reveal'
       }
     }
-    
+
     return {
       shouldContinue: true,
       reason: `${unrevealedCells.length} cells remaining`
@@ -240,7 +256,7 @@ export class SimulationUtil {
       cellType: cell.isMine ? 'mine' : cell.neighborMines === 0 ? 'empty' : `number-${cell.neighborMines}`,
       result: cell.isMine ? 'BOOM!' : 'safe'
     }
-    
+
     return historyEntry
   }
 

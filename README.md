@@ -9,7 +9,7 @@ A modern Minesweeper game built with Next.js, React, and Bootstrap 5 with a beau
 - 🎯 **Multiple Difficulty Levels**: Easy, Medium, Hard, and Custom grid sizes
 - 🎨 **Dark Theme**: Beautiful dark mode with Bootstrap 5
 - ⏱️ **Timer & Statistics**: Track your time, mines, and flags
-- 🤖 **Autoplay Simulator**: Watch an automated player highlight moves and log every click
+- 🤖 **Autoplay Simulator**: Watch an automated player highlight moves and log every click (details below)
 - 📱 **Responsive Design**: Works on desktop and mobile devices
 - 🚀 **Next.js Powered**: Fast, optimized React application
 - 🎪 **Visual Enhancements**: Chord-click indicators and hover effects
@@ -30,12 +30,21 @@ A modern Minesweeper game built with Next.js, React, and Bootstrap 5 with a beau
 ### Advanced Features
 - **Chord-Clicking**: Double-click any revealed numbered cell when you have the correct number of flags around it to auto-reveal all unflagged neighbors
 - **Flood Fill**: Clicking empty cells (0 neighboring mines) automatically reveals connected safe areas
-- **Visual Hints**: Numbered cells show a blue dot indicator when they can be chord-clicked
+- **Visual Hints**: Numbered cells include a subtle hover effect to suggest chord-clicking when correctly flagged
 
 ### Simulation Mode
 - **Toggle Autoplay**: Use the `Simulate` button in the controls to let an automated player pick random unrevealed cells while the board highlights the next move.
 - **Live Click Log**: A sidebar appears during or after simulation runs, capturing timestamps, coordinates, cell types, and whether each click was safe or a mine.
 - **Automatic Shutdown**: The simulator stops itself when you end it manually, win, lose, or start a brand-new game, ensuring normal play resumes instantly.
+
+#### Simulation Details
+
+- Selection strategy: uniform random among all unrevealed, unflagged cells (no heuristics yet)
+- Default cadence: one simulated click every ~2s; the chosen cell is highlighted for ~1s, then clicked
+- Controls: Simulate toggles Start/Stop; New Game and difficulty controls are disabled while simulating
+- Sidebar visibility: remains visible after a run until you start a new game
+- Log schema (per click): `{ timestamp, row, col, cellType: 'mine' | 'empty' | 'number-N', result: 'BOOM!' | 'safe' }`
+- Developer note: the simulator is implemented in `utils/SimulationUtil.js` and can be started programmatically via `startAsync(stepIntervalMs, highlightMs, deadMs)`
 
 ## Difficulty Levels
 
@@ -231,19 +240,29 @@ If you do want a pure static export, you must remove the scoreboard feature (or 
 ```
 minesweeper-nextjs/
 ├── app/
-│   ├── layout.jsx          # Root layout with Bootstrap & theming
-│   ├── page.jsx            # Main game page with logic
-│   └── globals.css         # Global styles & CSS variables
+│   ├── layout.jsx                 # Root layout (Bootstrap + Font Awesome via CDN)
+│   ├── page.jsx                   # Main page: game state + simulation wiring
+│   ├── globals.css                # Theme, grid, simulation sidebar/highlight styles
+│   └── api/
+│       └── scores/route.js        # Scoreboard REST API (GET/POST)
 ├── components/
-│   ├── Header.jsx          # App header component
-│   ├── GameControls.jsx    # Game controls (difficulty, new game)
-│   ├── GameStats.jsx       # Game statistics display
-│   ├── GameBoard.jsx       # Game board container
-│   ├── GameCell.jsx        # Individual game cell
-│   └── Footer.jsx          # App footer
-├── package.json            # Dependencies & scripts
-├── next.config.js          # Next.js configuration
-└── README.md              # This file
+│   ├── Header.jsx                 # App header
+│   ├── GameControls.jsx           # Difficulty, New Game, Simulate toggle
+│   ├── GameStats.jsx              # Mines, flags, timer
+│   ├── GameBoard.jsx              # Grid container
+│   ├── GameCell.jsx               # Individual cell
+│   ├── ScoreBoard.jsx             # Scores table (client)
+│   ├── ScoreboardModal.jsx        # Modal wrapper for scoreboard
+│   ├── SimulationSidebar.jsx      # Live simulation click log
+│   └── Footer.jsx                 # Footer
+├── lib/
+│   └── db.js                      # better-sqlite3 setup and queries
+├── utils/
+│   ├── GameUtil.js                # Board creation, flood fill, click handlers
+│   └── SimulationUtil.js          # Async simulator (random strategy + highlighting)
+├── package.json                   # Dependencies & scripts
+├── next.config.js                 # Next.js configuration
+└── README.md                      # This file
 ```
 
 ## Technologies Used
@@ -251,9 +270,21 @@ minesweeper-nextjs/
 - **Next.js 16**: React framework with App Router and Turbopack
 - **React 18**: UI library with modern hooks
 - **Bootstrap 5**: CSS framework with dark theme
-- **Font Awesome**: Icons for enhanced UI
+- **Font Awesome**: Icons for enhanced UI (loaded via CDN in `app/layout.jsx`)
 - **CSS Custom Properties**: Theme customization
 - **JavaScript ES6+**: Modern JavaScript with recursive algorithms
+
+### Dependencies (from package.json)
+
+```
+better-sqlite3@^9.6.0
+bootstrap@^5.3.8
+next@^16.0.0
+react@^18.3.1
+react-dom@^18.3.1
+eslint@^9.x (dev)
+eslint-config-next@^16.x (dev)
+```
 
 ## Customization
 
@@ -312,51 +343,13 @@ Deploy the generated files to any static hosting service.
 
 Flood fill is a **recursive algorithm** that automatically reveals large areas of safe cells when you click on an "empty" cell (a cell with 0 neighboring mines). It's like water flooding through connected empty spaces.
 
-### 🎯 **Where It's Applied in the Project:**
+### 🎯 Where it's applied in the project
 
-The flood fill algorithm is implemented in **TWO locations** in the minesweeper project:
+The flood fill logic now lives in a single place and is reused:
 
-#### **1. Primary Location: `handleCellClick` Function**
-```javascript
-// Lines 125-142 in app/page.jsx
-const revealCell = (r, c) => {
-  // Boundary and safety checks
-  if (r < 0 || r >= newBoard.length || c < 0 || c >= newBoard[0].length) return
-  if (newBoard[r][c].isRevealed || newBoard[r][c].isFlagged || newBoard[r][c].isMine) return
-
-  // Reveal the current cell
-  newBoard[r][c].isRevealed = true
-
-  // THE MAGIC: If this cell has 0 neighboring mines, flood fill to neighbors
-  if (newBoard[r][c].neighborMines === 0) {
-    for (let dr = -1; dr <= 1; dr++) {
-      for (let dc = -1; dc <= 1; dc++) {
-        revealCell(r + dr, c + dc)  // Recursive call!
-      }
-    }
-  }
-}
-```
-
-#### **2. Secondary Location: `handleCellDoubleClick` Function (Chord-Clicking)**
-```javascript
-// Same algorithm used in chord-clicking for auto-revealing neighbors
-const revealCell = (r, c) => {
-  if (r < 0 || r >= newBoard.length || c < 0 || c >= newBoard[0].length) return
-  if (newBoard[r][c].isRevealed || newBoard[r][c].isFlagged || newBoard[r][c].isMine) return
-
-  newBoard[r][c].isRevealed = true
-
-  // Same flood fill logic for chord-clicking
-  if (newBoard[r][c].neighborMines === 0) {
-    for (let dr = -1; dr <= 1; dr++) {
-      for (let dc = -1; dc <= 1; dc++) {
-        revealCell(r + dr, c + dc)
-      }
-    }
-  }
-}
-```
+- Core implementation: `utils/GameUtil.js` → `GameUtil.floodFillReveal(row, col)`
+- Used by left-click flow: `GameUtil.handleCellClick(...)`
+- Used by chord-click flow: `GameUtil.handleChordClick(...)` (reveals neighbors and applies flood fill as needed)
 
 ### 🔄 **How the Algorithm Works Step-by-Step:**
 
@@ -418,13 +411,9 @@ Numbers = Automatically revealed
 4. **Win Detection**: Properly counts revealed cells after flood fill
 5. **Game State**: Integrated with timer and game state management
 
-#### **The Magic Formula:**
-```javascript
-// This single line triggers the entire flood fill:
-if (newBoard[r][c].neighborMines === 0) {
-  // Recursively reveal all 8 neighbors
-}
-```
+#### The magic formula
+
+Inside `GameUtil.floodFillReveal`, an inner `revealCell(r, c)` reveals a cell, and if `neighborMines === 0`, recursively reveals all eight neighbors. This ensures empty regions open up in one click while numbered cells terminate the recursion.
 
 This algorithm is the **heart of minesweeper gameplay** - it transforms a simple grid-clicking game into a strategic puzzle by automatically clearing safe areas and revealing the mine-adjacent numbered cells that provide clues for the next move! 🎯
 

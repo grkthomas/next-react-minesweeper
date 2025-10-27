@@ -58,7 +58,7 @@ export default function MinesweeperPage() {
     setIsSimulating(false)
     setHighlightedCell(null)
     setSimulationHistory([])
-  setScoreSaved(false)
+    setScoreSaved(false)
     
     // Get difficulty settings using GameUtil
     const settings = GameUtil.getDifficultySettings(difficulty, customRows, customCols)
@@ -76,6 +76,18 @@ export default function MinesweeperPage() {
       setTimerInterval(null)
     }
   }, [difficulty, customRows, customCols, timerInterval])
+
+  // Build a consistent click payload to avoid repetition
+  const getGameState = useCallback((clickType, row, col, opts = {}) => ({
+    clickType,
+    row,
+    col,
+    currentBoard: boardRef.current,
+    currentGameState: gameStateRef.current,
+    currentMineCount: mineCountRef.current,
+    currentTimerInterval: timerIntervalRef.current,
+    ...opts,
+  }), [])
 
   // Unified click handler using GameUtil
   const processClickActions = useCallback((actions) => {
@@ -112,47 +124,27 @@ export default function MinesweeperPage() {
 
   // Handle cell click (reveal) - Clean version using GameUtil
   const handleCellClick = useCallback((row, col, isSimulated = false) => {
-    const result = GameUtil.handleCompleteClick({
-      clickType: 'left',
-      row,
-      col,
-      currentBoard: boardRef.current,
-      currentGameState: gameStateRef.current,
-      currentMineCount: mineCountRef.current,
-      currentTimerInterval: timerIntervalRef.current,
-      isSimulated,
-      SimulationUtil
-    })
+    const result = GameUtil.handleCompleteClick(
+      getGameState('left', row, col, { isSimulated, SimulationUtil })
+    )
     
     processClickActions(result.actions)
   }, [processClickActions])
 
   // Handle right click (flag) - Clean version using GameUtil
   const handleCellRightClick = useCallback((row, col) => {
-    const result = GameUtil.handleCompleteClick({
-      clickType: 'right',
-      row,
-      col,
-      currentBoard: boardRef.current,
-      currentGameState: gameStateRef.current,
-      currentMineCount: mineCountRef.current,
-      currentTimerInterval: timerIntervalRef.current
-    })
+    const result = GameUtil.handleCompleteClick(
+      getGameState('right', row, col)
+    )
     
     processClickActions(result.actions)
   }, [processClickActions])
 
   // Handle double click (chord clicking / auto-reveal neighbors) - Clean version using GameUtil  
   const handleCellDoubleClick = useCallback((row, col) => {
-    const result = GameUtil.handleCompleteClick({
-      clickType: 'double',
-      row,
-      col,
-      currentBoard: boardRef.current,
-      currentGameState: gameStateRef.current,
-      currentMineCount: mineCountRef.current,
-      currentTimerInterval: timerIntervalRef.current
-    })
+    const result = GameUtil.handleCompleteClick(
+      getGameState('double', row, col)
+    )
     
     processClickActions(result.actions)
   }, [processClickActions])
